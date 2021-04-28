@@ -12,13 +12,11 @@ public class ThreadPool implements Runnable {
     private File file;
     BlockingQueue<String> blockingQueue = new LinkedBlockingDeque<>();
     public ThreadPool(String year){
-        this.year = year;
+        this.file = new File("data\\input"+year+".txt");
     }
-    public ThreadPool(File file){
-        this.file = file;
-    }
-    public void push(String data){
-        this.blockingQueue.add(data);
+
+    public void push(String data) throws InterruptedException {
+        this.blockingQueue.put(data);
     }
     BufferedWriter writer;
     @Override
@@ -26,8 +24,9 @@ public class ThreadPool implements Runnable {
         try {
             String line;
             int i = 0;
-            while ((line = blockingQueue.poll()) != null) {
+            while ((line = blockingQueue.take()) != null) {
                 writer = new BufferedWriter(new FileWriter(file));
+
                 i++;
 //                String[] part = line.split(",");
 //                String[] s = part[2].trim().replaceAll("\\s+", " ").split(" ");
@@ -38,12 +37,13 @@ public class ThreadPool implements Runnable {
 //                }
 //                String str = part[0] + "," + part[1] + "," + owner + "," + part[3] + "," + part[4] + "\n";
 //                writer.write(str);
+                writer.write(line + "\n");
                 if(i%100000 == 0) {
                     System.out.println(i);
                 }
             }
         }
-        catch (IOException e){
+        catch (IOException | InterruptedException e){
             e.printStackTrace();
         }
     }
